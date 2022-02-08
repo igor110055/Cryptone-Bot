@@ -24,7 +24,8 @@ def go(bot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, dbot:
         invite = dbot.vip_invite(username)
         invite_link = invite.url
         db.set("UPDATE membership SET discord_invite=%s WHERE user_id=%s", invite.code, user.id)
-    text = f"<b>{username}</b> click on the button below to access the Discord VIP channel.\n"
+    text = f"<b>{username}</b> click on the button below to access the Discord VIP channel.\n\n" \
+           f"<i>If you are already on the server, leave the server and join again using this invite.</i>"
     markup = Markup(row_width=1)
     markup.add(Button("Join Discord VIP channel", callback_data="join_vip", url=invite_link))
     bot.reply_to(message, text=text, reply_markup=markup)
