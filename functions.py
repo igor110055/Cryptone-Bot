@@ -11,10 +11,8 @@ BASE_URL_TRANSACTIONS = "https://api.trongrid.io/v1/accounts/"
 BASE_URL_BALANCE = "https://apilist.tronscan.org/api/account"
 USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
 LOOP_INTERVAL = 10  # in minutes
-# CRYPTONE_CHANNEL_ID = -1001572728495
-CRYPTONE_CHANNEL_ID = -1001639821171
-# ADMIN_USERS = [2070870506]    # [Charlie]
-ADMIN_USERS = [2070870506, 2109610580]    # [Charlie, Hazzu]
+CRYPTONE_CHANNEL_ID = -1001572728495
+ADMIN_USERS = [2070870506]    # [Charlie]
 
 
 def vip_loop(tbot: telebot.TeleBot, db: DataBase, dbot: DisBot):
