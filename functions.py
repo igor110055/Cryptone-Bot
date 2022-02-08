@@ -11,8 +11,10 @@ BASE_URL_TRANSACTIONS = "https://api.trongrid.io/v1/accounts/"
 BASE_URL_BALANCE = "https://apilist.tronscan.org/api/account"
 USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
 LOOP_INTERVAL = 10  # in minutes
-CRYPTONE_CHANNEL_ID = -1001572728495
-ADMIN_USERS = [2070870506]    # [Charlie]
+# CRYPTONE_CHANNEL_ID = -1001572728495
+CRYPTONE_CHANNEL_ID = -607284339
+# ADMIN_USERS = [2070870506]    # [Charlie]
+ADMIN_USERS = [2070870506, 2109610580]    # [Charlie, Hazzu]
 
 
 def vip_loop(tbot: telebot.TeleBot, db: DataBase, dbot: DisBot):
@@ -25,13 +27,13 @@ def vip_loop(tbot: telebot.TeleBot, db: DataBase, dbot: DisBot):
 
 def notify_vip_ending(bot: telebot.TeleBot, db: DataBase):
     sql = f'''
-        SELECT chat_id
+        SELECT telegram_id
         FROM membership
         WHERE (end_date-now()) > interval '3 days' AND (end_date-now()) < interval '3 days {LOOP_INTERVAL} minutes'
     '''
     vip_ending = db.get(sql)
-    for chat_id in vip_ending:
-        chat = bot.get_chat(chat_id[0])
+    for user_id in vip_ending:
+        chat = bot.get_chat(user_id[0])
         text = f"Hi **{chat.username}**\n" \
                f"I'm here to remind you that your vip ends in *2* days\n" \
                f"Use the /buy command if you want to renew it"
@@ -42,19 +44,19 @@ def remove_vip(bot: telebot.TeleBot, db: DataBase, dbot: DisBot):
     sql = f'''
         DELETE FROM membership
         WHERE end_date < now()
-        RETURNING user_id, chat_id, discord_id
+        RETURNING telegram_id, discord_id
     '''
     vip_finished = db.get(sql)
     for u in vip_finished:
-        bot.ban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=u[1])
-        chat = bot.get_chat(u[1])
+        bot.ban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=u[0])
+        chat = bot.get_chat(u[0])
         text = f"Hi **{chat.username}**\n" \
                f"Your access to the Charliecryptone channel has been removed because your VIP plan has expired.\n" \
                f"Use /buy if you want to re-buy."
         bot.send_message(chat_id=chat.id, text=text)
-        if u[2]:
-            dbot.remove_vip(u[2])
-
+        if u[1]:
+            dbot.remove_vip(u[1])
+        db.set("INSERT INTO expired(telegram_id, discord_id) VALUES (%s, %s)", u[0], u[1])
 
 
 def get_transaction(address: str, min_value: float, contract: str = USDT_CONTRACT) -> Optional[Transaction]:

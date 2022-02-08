@@ -1,5 +1,5 @@
 import diskord
-from telebot import TeleBot
+import telebot
 from diskord.ext import commands
 from classes import DataBase
 from asyncio import create_task, run_coroutine_threadsafe, new_event_loop
@@ -9,7 +9,7 @@ WELCOME_CHANNEL_ID = 910152538630803499
 
 
 class DisBot(commands.Cog, name="Cryptone Discord"):
-    def __init__(self, bot: commands.Bot, db: DataBase, tbot: TeleBot):
+    def __init__(self, bot: commands.Bot, db: DataBase, tbot: telebot.TeleBot):
         self.bot = bot
         self.db = db
         self.tbot = tbot
@@ -29,7 +29,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
     @commands.command()
     @commands.is_owner()
     async def addvip(self, ctx: commands.Context, member_id: int, days: int):
-        member = self.guild.get_member(member_id)
+        member = self.get_member(member_id)
         if not member:
             return await ctx.reply('⚠ Member not found.')
         duraction = f'{days} days'
@@ -63,28 +63,35 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
             RETURNING id
         ''', member.id, invite.code)
         if data:
-            await member.add_roles(self.vip)
+            self.add_vip(member)
 
     async def fetch_invites(self) -> list:
         invites = await self.guild.invites()
         return [i for i in invites if i.max_uses == 1 and i.inviter == self.bot.user]
 
     def remove_vip(self, member_id: int):
-        member = self.guild.get_member(member_id)
+        member = self.get_member(member_id)
         if member:
             self.bot.loop.create_task(member.remove_roles(self.vip))
 
-    def vip_invite(self, username: str) -> diskord.Invite:
-        fut = run_coroutine_threadsafe(self.create_unique_invite(username), self.bot.loop)
+    def add_vip(self, member: diskord.Member):
+        self.bot.loop.create_task(member.add_roles(self.vip))
+
+    def get_member(self, member_id: int) -> diskord.Member:
+        return self.guild.get_member(member_id)
+
+    def vip_invite(self, user: telebot.types.User) -> diskord.Invite:
+        fut = run_coroutine_threadsafe(self.create_unique_invite(user), self.bot.loop)
         invite = fut.result()
         return invite
 
-    async def create_unique_invite(self, username: str) -> diskord.Invite:
+    async def create_unique_invite(self, user: telebot.types.User) -> diskord.Invite:
         invite = await self.welcome.create_invite(
             max_uses=1,
-            reason=f"Vip Invitation to {username}"
+            reason=f"Vip Invitation to {user.username}"
         )
         self.invites.append(invite)
+        self.db.set("UPDATE membership SET discord_invite=%s WHERE telegram_id=%s", invite.code, user.id)
         return invite
 
     def run(self, token: str):
@@ -108,11 +115,11 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
 
     @commands.command()
     async def membership(self, ctx: commands.Context, member_id: int):
-        member = self.guild.get_member(member_id)
+        member = self.get_member(member_id)
         if not member:
             return await ctx.reply('⚠ Member not found.')
         data = self.db.get(f'''
-            SELECT user_id, start_date, end_date
+            SELECT telegram_id, start_date, end_date
             FROM membership
             WHERE discord_id=%s
         ''', member.id)
@@ -125,14 +132,14 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
             description=f"Some info about `{member}`.",
             color=diskord.Colour.blue()
         )
-        emb.set_thumbnail(url=member.display_avatar)
+        emb.set_thumbnail(url=member.display_avatar.url)
         emb.add_field(name="Telegram", value=f"[{telegram.username}](https://t.me/{telegram.username})", inline=True)
         emb.add_field(name="Start date", value=f"{data[1]:%d/%m/%Y}", inline=True)
         emb.add_field(name="End date", value=f"{data[2]:%d/%m/%Y}", inline=True)
         await ctx.reply(embed=emb)
 
 
-def build_bot(db: DataBase, tbot: TeleBot) -> DisBot:
+def build_bot(db: DataBase, tbot: telebot.TeleBot) -> DisBot:
     bot = commands.Bot(
         loop=new_event_loop(),
         command_prefix="!",

@@ -5,7 +5,7 @@ from functions import format_remaining_time
 
 def go(bot: telebot.TeleBot, message: telebot.types.Message, db: DataBase):
     user = message.from_user
-    data = db.get("SELECT end_date, end_date-now() FROM membership WHERE user_id=%s", user.id)
+    data = db.get("SELECT end_date, end_date-now() FROM membership WHERE telegram_id=%s", user.id)
     if not data:
         text = "You are not vip."
     else:

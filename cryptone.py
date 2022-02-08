@@ -56,7 +56,7 @@ def vip_cmd(message):
 
 @tbot.message_handler(commands=['addvip'])
 def addvip_cmd(message):
-    addvip.go(tbot, message, db, purchases)
+    addvip.go(tbot, message, db, purchases, dbot)
 
 
 @tbot.message_handler(commands=['removevip'])
@@ -74,12 +74,8 @@ def wallets_cmd(message):
     wallets.go(tbot, message, db)
 
 
-tasks = [
-    Thread(target=vip_loop, args=(tbot, db, dbot), daemon=True),
-    Thread(target=dbot.run, args=(keys.DISCORD_TOKEN, ), daemon=True)
-]
-for task in tasks:
-    task.start()
+Thread(target=vip_loop, args=(tbot, db, dbot), daemon=True).start()
+Thread(target=dbot.run, args=(keys.DISCORD_TOKEN, ), daemon=True).start()
 
 print("-----| TELEGRAM BOT ONLINE |-----")
 tbot.infinity_polling()

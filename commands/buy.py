@@ -20,7 +20,7 @@ def go(bot: telebot.TeleBot, message: telebot.types.Message, purchases: dict, db
         membership = db.get(
             f"SELECT end_date-interval '3 days', now() < (end_date-interval '3 days') "
             f"FROM membership "
-            f"WHERE user_id=%s",
+            f"WHERE telegram_id=%s",
             user.id
         )
         if membership:

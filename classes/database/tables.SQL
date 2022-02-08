@@ -17,10 +17,16 @@ CREATE TABLE transactions(
 
 CREATE TABLE membership(
     id SERIAL PRIMARY KEY,
-    user_id BIGINT UNIQUE NOT NULL,
-    chat_id BIGINT NOT NULL,
+    telegram_id BIGINT UNIQUE NOT NULL,
     start_date TIMESTAMP DEFAULT current_timestamp,
     end_date TIMESTAMP NOT NULL,
     discord_invite VARCHAR(10),
-    discord_id BIGINT
+    discord_id BIGINT UNIQUE
+);
+
+CREATE TABLE expired(
+    id SERIAL PRIMARY KEY,
+    telegram_id BIGINT UNIQUE NOT NULL,
+    discord_id BIGINT,
+    end_date TIMESTAMP DEFAULT current_timestamp
 );
