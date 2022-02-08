@@ -54,6 +54,9 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
                 create_task(self.on_invite_use(invite, member))
                 break
         self.invites = new_invites
+        is_vip = self.db.get("SELECT EXISTS(SELECT true FROM membership WHERE discord_id=%s)", member.id)
+        if is_vip[0][0]:
+            self.add_vip(member)
 
     async def on_invite_use(self, invite: diskord.Invite, member: diskord.Member):
         data = self.db.get(f'''

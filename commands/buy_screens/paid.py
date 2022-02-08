@@ -5,14 +5,15 @@ from functions import get_transaction
 from classes.purchase import TIMEOUT
 import psycopg2
 from time import sleep, time
+from discord_bot import DisBot
 CHECK_DEELAY = 10
 MAX_CHECK_TIME = 70
 
 
-def display(bot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, db: DataBase):
+def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, db: DataBase, dbot: DisBot):
     text = "DO NOT close this chat. We are checking your payment\n" \
            "This may take some time..."
-    bot.edit_message_text(text=text, chat_id=msg.chat.id, message_id=msg.id, reply_markup=None)
+    tbot.edit_message_text(text=text, chat_id=msg.chat.id, message_id=msg.id, reply_markup=None)
     purchase = purchases[msg.chat.id]
     tran = None
     start_check_time = time()
@@ -31,9 +32,8 @@ def display(bot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, d
         try:
             db.set(sql, tran.id, tran.from_wallet, tran.to_wallet, tran.value, purchase.user.username, purchase.get_price(), purchase.get_wallet())
         except psycopg2.errors.UniqueViolation:     # This transaction has already been used
-            payment_error.display(bot, msg, purchases)
+            payment_error.display(tbot, msg, purchases)
         else:
-            payment_sucess.display(bot, msg, purchases, db)
+            payment_sucess.display(tbot, msg, purchases, db, dbot)
     else:
-        payment_error.display(bot, msg, purchases)
-
+        payment_error.display(tbot, msg, purchases)

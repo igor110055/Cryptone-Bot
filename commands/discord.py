@@ -11,14 +11,17 @@ def go(bot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, dbot:
     if not data:
         text = "You do not have an active vip plan. Purchase now using /buy."
         return bot.reply_to(message, text=text)
-    if data[0][1]:
-        member = dbot.guild.get_member(data[0][1])
+    data = data[0]
+    invite_code, discord_id = data[0], data[1]
+    if discord_id:
+        member = dbot.get_member(discord_id)
         if member and dbot.vip in member.roles:
             text = f"You have already joined the discord vip channel through the account <code>{member}</code>."
             return bot.reply_to(message, text=text)
-        db.set("UPDATE membership SET discord_id=NULL WHERE telegram_id=%s", user.id)
-    if data[0][0]:
-        invite_link = BASE_INVITE + data[0][0]
+        db.set("UPDATE membership SET discord_invite=NULL, discord_id=NULL WHERE telegram_id=%s", user.id)
+        invite_code = None
+    if invite_code:
+        invite_link = BASE_INVITE + invite_code
     else:
         invite = dbot.vip_invite(user)
         invite_link = invite.url

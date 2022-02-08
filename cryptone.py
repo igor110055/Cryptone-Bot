@@ -34,7 +34,7 @@ def callback(call):
         elif call.data == "payment":
             payment.display(tbot, msg, purchases)
         elif call.data == "paid":
-            paid.display(tbot, msg, purchases, db)
+            paid.display(tbot, msg, purchases, db, dbot)
         elif call.data == "cancel":
             text = "Request canceled.\nType /buy to restart."
             tbot.edit_message_text(text=text, chat_id=msg.chat.id, message_id=msg.id, reply_markup=None)
