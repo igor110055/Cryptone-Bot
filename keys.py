@@ -1,0 +1,6 @@
+from os import environ as env
+
+
+TELEGRAM_TOKEN = env["TELEGRAM_TOKEN"]
+DISCORD_TOKEN = env["DISCORD_TOKEN"]
+DATABASE_DSN = env["DATABASE_DSN"]
