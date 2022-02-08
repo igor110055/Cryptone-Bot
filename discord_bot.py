@@ -2,7 +2,7 @@ import diskord
 from telebot import TeleBot
 from diskord.ext import commands
 from classes import DataBase
-from asyncio import create_task, run_coroutine_threadsafe
+from asyncio import create_task, run_coroutine_threadsafe, new_event_loop
 CRYPTONE_GUILD_ID = 910152538630803496
 VIP_ROLE_ID = 939323751487660042
 WELCOME_CHANNEL_ID = 910152538630803499
@@ -88,7 +88,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         return invite
 
     def run(self, token: str):
-        self.bot.run(token)
+        self.bot.loop.run_until_complete(self.bot.start(token))
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception):
@@ -127,6 +127,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
 
 def build_bot(db: DataBase, tbot: TeleBot) -> DisBot:
     bot = commands.Bot(
+        loop=new_event_loop(),
         command_prefix="!",
         strip_after_prefix=True,
         intents=diskord.Intents(guilds=True, members=True, messages=True, invites=True)
