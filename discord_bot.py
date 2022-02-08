@@ -88,7 +88,14 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         return invite
 
     def run(self, token: str):
-        self.bot.loop.run_until_complete(self.bot.start(token))
+        loop = self.bot.loop
+        try:
+            loop.run_until_complete(self.bot.start(token))
+        except KeyboardInterrupt:
+            loop.run_until_complete(self.bot.close())
+            # cancel all tasks lingering
+        finally:
+            loop.close()
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception):
