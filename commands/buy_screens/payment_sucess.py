@@ -6,7 +6,6 @@ from functions import CRYPTONE_CHANNEL_ID
 
 
 def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, db: DataBase, dbot: DisBot):
-    print(msg.chat.id)
     purchase = purchases[msg.chat.id]
     discord_member = None
     previous = db.get("DELETE FROM expired WHERE telegram_id=%s RETURNING discord_id", purchase.user.id)
@@ -36,10 +35,9 @@ def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, 
     else:
         if telegram_member.status != 'member':
             telegram_member = None
-
     if not telegram_member:
         text += f"\n\nClick on the button to access VIP channel."
-        tbot.unban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=purchase.user.id, only_if_banned=True)
+        tbot.unban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=purchase.user.id)
         invite = tbot.create_chat_invite_link(chat_id=CRYPTONE_CHANNEL_ID, name=f"Access to {purchase.user.username}", member_limit=1)
         markup = Markup(row_width=1)
         markup.add(Button("Join Telegram VIP channel", callback_data="join_vip", url=invite.invite_link))
