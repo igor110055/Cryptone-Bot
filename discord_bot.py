@@ -46,7 +46,6 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: diskord.Member):
-        print(f"{member} joined.")
         new_invites = await self.fetch_invites()
         for invite in self.invites:
             if invite not in new_invites:
@@ -57,7 +56,6 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.invites = new_invites
 
     async def on_invite_use(self, invite: diskord.Invite, member: diskord.Member):
-        print(f"{member} joined with {invite.url}.")
         data = self.db.get(f'''
             UPDATE membership
             SET discord_id=%s
