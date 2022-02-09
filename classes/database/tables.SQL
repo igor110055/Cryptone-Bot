@@ -8,6 +8,7 @@ CREATE TABLE wallets(
 
 CREATE TABLE transactions(
     id SMALLSERIAL PRIMARY KEY,
+    telegram_id BIGINT,
     hash VARCHAR(64) UNIQUE NOT NULL,
     from_wallet VARCHAR(34) NOT NULL,
     to_wallet VARCHAR(34) NOT NULL,

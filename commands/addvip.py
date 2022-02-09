@@ -1,6 +1,6 @@
 import telebot
-from classes import DataBase, Purchase
-from commands.buy_screens import plans, payment_sucess
+from classes import DataBase, Purchase, Plan
+from commands.buy_screens import payment_sucess
 from functions import authorize
 from discord_bot import DisBot
 
@@ -10,17 +10,11 @@ def go(tbot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, purc
         args = message.text.split(" ")
         try:
             user_id = int(args[1])
-            plan_price = int(args[2])
+            days = int(args[2])
         except ValueError:
             tbot.reply_to(message, text="Invalid number.")
         else:
-            plan = None
-            for p in plans.PLANS:
-                if p.price == plan_price:
-                    plan = p
-                    break
-            if not plan:
-                return tbot.reply_to(message, text="There is no plan at this price.")
+            plan = Plan(price=0, duraction=f"{days} days")
             try:
                 chat = tbot.get_chat(user_id)
             except telebot.apihelper.ApiTelegramException:
@@ -29,7 +23,7 @@ def go(tbot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, purc
                        f"• The user id <b>{user_id}</b> is correct."
                 tbot.reply_to(message, text=text)
             else:
-                tbot.reply_to(message, text=f"Vip added to @{chat.username}.")
+                tbot.reply_to(message, text=f"{plan.show_duraction()} vip added to @{chat.username}.")
                 message.chat = chat
                 purchases[chat.id] = Purchase(chat, plan, db)
                 payment_sucess.display(tbot, message, purchases, db, dbot)

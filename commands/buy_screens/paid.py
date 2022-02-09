@@ -25,12 +25,12 @@ def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, 
         sleep(CHECK_DEELAY)
     if tran:
         sql = f'''
-            INSERT INTO transactions(hash, from_wallet, to_wallet, amount, username)
-            VALUES(%s, %s, %s, %s, %s);
+            INSERT INTO transactions(hash, from_wallet, to_wallet, amount, telegram_id, username)
+            VALUES(%s, %s, %s, %s, %s, %s);
             UPDATE wallets SET balance=balance+%s WHERE address=%s;
         '''
         try:
-            db.set(sql, tran.id, tran.from_wallet, tran.to_wallet, tran.value, purchase.user.username, purchase.get_price(), purchase.get_wallet())
+            db.set(sql, tran.id, tran.from_wallet, tran.to_wallet, tran.value, purchase.user.id, purchase.user.username, purchase.get_price(), purchase.get_wallet())
         except psycopg2.errors.UniqueViolation:     # This transaction has already been used
             payment_error.display(tbot, msg, purchases)
         else:
