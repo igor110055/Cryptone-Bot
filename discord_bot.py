@@ -5,7 +5,7 @@ from classes import DataBase
 from asyncio import create_task, run_coroutine_threadsafe, new_event_loop
 CRYPTONE_GUILD_ID = 910152538630803496
 VIP_ROLE_ID = 939323751487660042
-WELCOME_CHANNEL_ID = 910152538630803499
+INVITE_CHANNEL_ID = 939157268069502976
 
 
 class DisBot(commands.Cog, name="Cryptone Discord"):
@@ -16,14 +16,14 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.invites = []
         self.guild = None
         self.vip = None
-        self.welcome = None
+        self.invite_channel = None
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("-----| DISCORD BOT ONLINE |-----")
         self.guild = self.bot.get_guild(CRYPTONE_GUILD_ID)
         self.vip = self.guild.get_role(VIP_ROLE_ID)
-        self.welcome = self.guild.get_channel(WELCOME_CHANNEL_ID)
+        self.invite_channel = self.guild.get_channel(INVITE_CHANNEL_ID)
         self.invites = await self.fetch_invites()
 
     @commands.command()
@@ -89,7 +89,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         return invite
 
     async def create_unique_invite(self, user: telebot.types.User) -> diskord.Invite:
-        invite = await self.welcome.create_invite(
+        invite = await self.invite_channel.create_invite(
             max_uses=1,
             reason=f"Vip Invitation to {user.username}"
         )

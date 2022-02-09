@@ -12,13 +12,18 @@ def go(tbot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, dbot
         except ValueError:
             tbot.reply_to(message, text="Invalid number.")
         else:
-            data = db.get("DELETE FROM membership WHERE telegram_id=%s RETURNING telegram_id, discord_id", user_id)
-            if data:
-                u = data[0]
-                if u[1]:
-                    dbot.remove_vip(u[1])
-                db.set("INSERT INTO expired(telegram_id, discord_id) VALUES (%s, %s)", u[0], u[1])
-            tbot.ban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=user_id)
+            data = db.get(f'''
+                DELETE FROM membership
+                WHERE telegram_id={user_id} OR discord_id={user_id}
+                RETURNING telegram_id, discord_id
+            ''')
+            if not data:
+                return tbot.reply_to(message, text="There is no registered user with this telegram id or discord id.")
+            u = data[0]
+            if u[1]:
+                dbot.remove_vip(u[1])
+            db.set("INSERT INTO expired(telegram_id, discord_id) VALUES (%s, %s)", u[0], u[1])
+            tbot.ban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=u[0])
             try:
                 chat = tbot.get_chat(user_id)
                 name = f"@{chat.username}"
