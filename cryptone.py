@@ -61,7 +61,7 @@ def addvip_cmd(message):
 
 @tbot.message_handler(commands=['removevip'])
 def removevip_cmd(message):
-    removevip.go(tbot, message, db)
+    removevip.go(tbot, message, db, dbot)
 
 
 @tbot.message_handler(commands=['discord'])

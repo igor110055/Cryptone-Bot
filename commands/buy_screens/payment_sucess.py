@@ -25,12 +25,23 @@ def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, 
     end_date = db.get(sql, purchase.user.id, disc_id, purchase.plan.get_duraction(), purchase.plan.duraction)[0][0]
     text = f"<b>Welcome @{purchase.user.username}!</b>\n" \
            "Your payment has been received.\n" \
-           f"Your VIP plan will expire on: <b>{end_date.strftime('%d/%m/%Y')}</b>.\n" \
-           f"\nClick on the button to access VIP channel."
-    tbot.unban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=purchase.user.id)
-    invite = tbot.create_chat_invite_link(chat_id=CRYPTONE_CHANNEL_ID, name=f"Access to {purchase.user.username}", member_limit=1)
-    markup = Markup(row_width=1)
-    markup.add(Button("Join Telegram VIP channel", callback_data="join_vip", url=invite.invite_link))
+           f"Your VIP plan will expire on: <b>{end_date.strftime('%d/%m/%Y')}</b>.\n"
+    markup = None
+    try:
+        telegram_member = tbot.get_chat_member(CRYPTONE_CHANNEL_ID, purchase.user.id)
+    except telebot.apihelper.ApiTelegramException:
+        telegram_member = None
+    else:
+        if telegram_member.status not in ['member', 'creator', 'administrator']:
+            telegram_member = None
+    if not telegram_member:
+        text += f"\nClick on the button to access VIP channel."
+        tbot.unban_chat_member(chat_id=CRYPTONE_CHANNEL_ID, user_id=purchase.user.id)
+        invite = tbot.create_chat_invite_link(chat_id=CRYPTONE_CHANNEL_ID, name=f"Access to {purchase.user.username}", member_limit=1)
+        markup = Markup(row_width=1)
+        markup.add(Button("Join Telegram VIP channel", callback_data="join_vip", url=invite.invite_link))
+    else:
+        text += "\nThank you for renewing your plan!"
 
     if discord_member:
         text += f"\nYour subscription has also been renewed on discord (<code>{discord_member}</code>)."
