@@ -72,6 +72,12 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         invites = await self.guild.invites()
         return [i for i in invites if i.max_uses == 1 and i.inviter == self.bot.user]
 
+    def is_valid_invite(self, invite_code: str) -> bool:
+        for invite in self.invites:
+            if invite.code == invite_code:
+                return True
+        return False
+
     def remove_vip(self, member_id: int):
         member = self.get_member(member_id)
         if member:

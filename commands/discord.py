@@ -18,14 +18,14 @@ def go(bot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, dbot:
         if member and dbot.vip in member.roles:
             text = f"You have already joined the discord vip channel through the account <code>{member}</code>."
             return bot.reply_to(message, text=text)
-        db.set("UPDATE membership SET discord_invite=NULL, discord_id=NULL WHERE telegram_id=%s", user.id)
-        invite_code = None
-    if invite_code:
+        db.set("UPDATE membership SET discord_id=NULL WHERE telegram_id=%s", user.id)
+    if invite_code and dbot.is_valid_invite(invite_code):
         invite_link = BASE_INVITE + invite_code
     else:
         invite = dbot.vip_invite(user)
         invite_link = invite.url
-    text = f"<b>{user.first_name}</b> click on the button below to access the Discord VIP channel."
+    text = f"<b>{user.first_name}</b> click on the button below to access the Discord VIP channel.\n" \
+           f"<i>If you are already on the server, leave and rejoin using this invite.</i>"
     markup = Markup(row_width=1)
     markup.add(Button("Join Discord VIP channel", callback_data="join_vip", url=invite_link))
     bot.reply_to(message, text=text, reply_markup=markup)
