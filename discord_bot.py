@@ -6,6 +6,9 @@ from asyncio import create_task, run_coroutine_threadsafe, new_event_loop
 CRYPTONE_GUILD_ID = 910152538630803496
 VIP_ROLE_ID = 939323751487660042
 INVITE_CHANNEL_ID = 939157268069502976
+CALLS_CATEGORY_ID = 939157462316105779
+GENERAL_CHAT_ID = 939157268069502976
+CRYPTONE_CHANNEL_ID = -1001572728495
 
 
 class DisBot(commands.Cog, name="Cryptone Discord"):
@@ -17,6 +20,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.guild = None
         self.vip = None
         self.invite_channel = None
+        self.general_channel = None
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -24,7 +28,26 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.guild = self.bot.get_guild(CRYPTONE_GUILD_ID)
         self.vip = self.guild.get_role(VIP_ROLE_ID)
         self.invite_channel = self.guild.get_channel(INVITE_CHANNEL_ID)
+        self.general_channel = self.guild.get_channel(GENERAL_CHAT_ID)
         self.invites = await self.fetch_invites()
+
+    @commands.Cog.listener()
+    async def on_message(self, message: diskord.Message):
+        if message.channel.category.id == CALLS_CATEGORY_ID:
+            coin_name = ""
+            for c in message.channel.name:
+                if c.isalnum():
+                    coin_name += c.upper()
+                elif c == "-":
+                    coin_name += " "
+            text = f"<b>${coin_name}</b>\n{message.content}"
+            if message.attachments and message.attachments[0].content_type.startswith("image"):
+                img = await message.attachments[0].read()
+                self.tbot.send_photo(chat_id=CRYPTONE_CHANNEL_ID, photo=img, caption=text)
+            else:
+                self.tbot.send_message(chat_id=CRYPTONE_CHANNEL_ID, text=text)
+            await self.general_channel.send(f"> I just posted an update/call in {message.channel.mention} {self.vip.mention}")
+        await self.bot.process_commands(message)
 
     @commands.command()
     @commands.is_owner()

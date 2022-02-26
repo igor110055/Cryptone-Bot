@@ -25,7 +25,7 @@ def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, 
         sleep(CHECK_DEELAY)
     if tran:
         sql = f'''
-            INSERT INTO transactions(hash, from_wallet, to_wallet, amount, telegram_id, username)
+            INSERT INTO transactions(hash, from_wallet, to_wallet, a mount, telegram_id, username)
             VALUES(%s, %s, %s, %s, %s, %s);
             UPDATE wallets SET balance=balance+%s WHERE address=%s;
         '''
