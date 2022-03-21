@@ -6,12 +6,12 @@ import telebot
 from classes import DataBase
 from time import sleep
 from contextlib import suppress
-from discord_bot import DisBot
+from disbot import DisBot
+from keys import CRYPTONE_CHANNEL_ID
 BASE_URL_TRANSACTIONS = "https://api.trongrid.io/v1/accounts/"
 BASE_URL_BALANCE = "https://apilist.tronscan.org/api/account"
 USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
 LOOP_INTERVAL = 10  # in minutes
-CRYPTONE_CHANNEL_ID = -1001572728495
 ADMIN_USERS = [2070870506]    # [Charlie]
 
 

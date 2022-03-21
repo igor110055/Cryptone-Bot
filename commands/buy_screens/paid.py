@@ -5,7 +5,7 @@ from functions import get_transaction
 from classes.purchase import TIMEOUT
 import psycopg2
 from time import sleep, time
-from discord_bot import DisBot
+from disbot import DisBot
 CHECK_DEELAY = 10
 MAX_CHECK_TIME = 70
 

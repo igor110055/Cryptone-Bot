@@ -1,7 +1,8 @@
 import telebot
 from classes import DataBase
-from functions import authorize, CRYPTONE_CHANNEL_ID
-from discord_bot import DisBot
+from functions import authorize
+from keys import CRYPTONE_CHANNEL_ID
+from disbot import DisBot
 
 
 def go(tbot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, dbot: DisBot):

@@ -1,14 +1,17 @@
 import diskord
 import telebot
-from diskord.ext import commands
+from diskord.ext import commands, tasks
 from classes import DataBase
-from asyncio import create_task, run_coroutine_threadsafe, new_event_loop
+from asyncio import create_task, run_coroutine_threadsafe, new_event_loop, sleep
+from .commands import addvip, membership
+from .ichimoku import get_coin_alerts
+from keys import CRYPTONE_CHANNEL_ID
 CRYPTONE_GUILD_ID = 910152538630803496
 VIP_ROLE_ID = 939323751487660042
 INVITE_CHANNEL_ID = 939157268069502976
-CALLS_CATEGORY_ID = 939157462316105779
+CALL_CATEGORY_IDS = [954413931017957436, 939157462316105779]
 GENERAL_CHAT_ID = 939157268069502976
-CRYPTONE_CHANNEL_ID = -1001572728495
+ALERTS_CHANNEL_ID = 955139699222151208
 
 
 class DisBot(commands.Cog, name="Cryptone Discord"):
@@ -21,6 +24,8 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.vip = None
         self.invite_channel = None
         self.general_channel = None
+        self.alerts_channel = None
+        self.ichimoku_alerts = get_coin_alerts(db)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -29,11 +34,20 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
         self.vip = self.guild.get_role(VIP_ROLE_ID)
         self.invite_channel = self.guild.get_channel(INVITE_CHANNEL_ID)
         self.general_channel = self.guild.get_channel(GENERAL_CHAT_ID)
+        self.alerts_channel = self.guild.get_channel(ALERTS_CHANNEL_ID)
         self.invites = await self.fetch_invites()
+        if not self.price_alerts.is_running():
+            self.price_alerts.start()
+
+    @tasks.loop(minutes=1)
+    async def price_alerts(self):
+        for alert in self.ichimoku_alerts:
+            await sleep(3)
+            create_task(alert.send_alerts(self.alerts_channel))
 
     @commands.Cog.listener()
     async def on_message(self, message: diskord.Message):
-        if message.channel.category.id == CALLS_CATEGORY_ID:
+        if message.channel.category.id in CALL_CATEGORY_IDS:
             coin_name = ""
             for c in message.channel.name:
                 if c.isalnum():
@@ -52,20 +66,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
     @commands.command()
     @commands.is_owner()
     async def addvip(self, ctx: commands.Context, member_id: int, days: int):
-        member = self.get_member(member_id)
-        if not member:
-            return await ctx.reply('⚠ Member not found.')
-        duraction = f'{days} days'
-        data = self.db.get(f'''
-            UPDATE membership
-            SET end_date=end_date + INTERVAL %s
-            WHERE discord_id=%s
-            RETURNING id
-        ''', duraction, member.id)
-        if data:
-            return await ctx.reply(f'⭐ **{duraction}** vip added to `{member}`.')
-        else:
-            return await ctx.reply('⚠ This member is not registered.')
+        await addvip.go(ctx, member_id, days, self)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: diskord.Member):
@@ -147,28 +148,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
 
     @commands.command()
     async def membership(self, ctx: commands.Context, member_id: int):
-        member = self.get_member(member_id)
-        if not member:
-            return await ctx.reply('⚠ Member not found.')
-        data = self.db.get(f'''
-            SELECT telegram_id, start_date, end_date
-            FROM membership
-            WHERE discord_id=%s
-        ''', member.id)
-        if not data:
-            return await ctx.reply(f"⚠ `{member}` is not vip.")
-        data = data[0]
-        telegram = self.tbot.get_chat(data[0])
-        emb = diskord.Embed(
-            title="⭐ MEMBERSHIP",
-            description=f"Some info about `{member}`.",
-            color=diskord.Colour.blue()
-        )
-        emb.set_thumbnail(url=member.display_avatar.url)
-        emb.add_field(name="Telegram", value=f"[{telegram.username}](https://t.me/{telegram.username})", inline=True)
-        emb.add_field(name="Start date", value=f"{data[1]:%d/%m/%Y}", inline=True)
-        emb.add_field(name="End date", value=f"{data[2]:%d/%m/%Y}", inline=True)
-        await ctx.reply(embed=emb)
+        await membership.go(ctx, member_id, self)
 
 
 def build_bot(db: DataBase, tbot: telebot.TeleBot) -> DisBot:

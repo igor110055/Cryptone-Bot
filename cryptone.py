@@ -12,7 +12,7 @@ from commands import buy, vip, wallets, addvip, removevip, discord
 from classes import DataBase, Purchase
 from commands.buy_screens import confirm_plan, payment, paid
 from commands.buy_screens.plans import PLANS
-from discord_bot import build_bot
+from disbot import build_bot
 from functions import vip_loop
 from threading import Thread
 

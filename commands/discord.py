@@ -1,6 +1,6 @@
 import telebot
 from classes import DataBase
-from discord_bot import DisBot
+from disbot import DisBot
 from telebot.types import InlineKeyboardMarkup as Markup, InlineKeyboardButton as Button
 BASE_INVITE = "https://discord.gg/"
 

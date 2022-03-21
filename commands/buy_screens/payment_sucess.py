@@ -1,8 +1,8 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup as Markup, InlineKeyboardButton as Button
 from classes import DataBase
-from discord_bot import DisBot
-from functions import CRYPTONE_CHANNEL_ID
+from disbot import DisBot
+from keys import CRYPTONE_CHANNEL_ID
 
 
 def display(tbot: telebot.TeleBot, msg: telebot.types.Message, purchases: dict, db: DataBase, dbot: DisBot):

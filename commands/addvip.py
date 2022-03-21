@@ -2,7 +2,7 @@ import telebot
 from classes import DataBase, Purchase, Plan
 from commands.buy_screens import payment_sucess
 from functions import authorize
-from discord_bot import DisBot
+from disbot import DisBot
 
 
 def go(tbot: telebot.TeleBot, message: telebot.types.Message, db: DataBase, purchases: dict, dbot: DisBot):

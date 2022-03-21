@@ -31,3 +31,11 @@ CREATE TABLE expired(
     discord_id BIGINT,
     end_date TIMESTAMP DEFAULT current_timestamp
 );
+
+CREATE TABLE coins(
+    id SERIAL PRIMARY KEY,
+    base VARCHAR(10) NOT NULL,
+    quote VARCHAR(10) NOT NULL,
+    exchange VARCHAR(20) NOT NULL,
+    UNIQUE(base, quote, exchange)
+);
