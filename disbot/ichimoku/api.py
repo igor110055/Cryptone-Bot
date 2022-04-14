@@ -41,8 +41,11 @@ async def get_candles(
                 'type': f"{timeframe[:-1]}{INTERVALS[timeframe[-1]][1]}",
                 'startAt': compute_start_time(timeframe, max_results)
             }
-            async with session.get(url=url, params=params) as resp:
-                data = await resp.json()
+            while True:
+                async with session.get(url=url, params=params) as resp:
+                    data = await resp.json()
+                if data['code'] != '429000':  # Not Rate limited
+                    break
             data = [d[:6] for d in reversed(data["data"])]
             df = pd.DataFrame(data, columns=["TIME", "OPEN", "PRICE", "HIGH", "LOW", "VOLUME"])
         else:

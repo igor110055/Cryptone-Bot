@@ -47,7 +47,8 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
 
     @commands.Cog.listener()
     async def on_message(self, message: diskord.Message):
-        if message.channel.category.id in CALL_CATEGORY_IDS:
+        category_id = getattr(message.channel.category, 'id', None)
+        if category_id in CALL_CATEGORY_IDS:
             coin_name = ""
             for c in message.channel.name:
                 if c.isalnum():
