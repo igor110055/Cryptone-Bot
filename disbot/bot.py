@@ -55,7 +55,7 @@ class DisBot(commands.Cog, name="Cryptone Discord"):
                     coin_name += c.upper()
                 elif c == "-":
                     coin_name += " "
-            text = f"<b>${coin_name}</b>\n{message.content}"
+            text = f"<b>${coin_name}</b>\n{message.clean_content}"
             if message.attachments and message.attachments[0].content_type.startswith("image"):
                 img = await message.attachments[0].read()
                 self.tbot.send_photo(chat_id=CRYPTONE_CHANNEL_ID, photo=img, caption=text)
