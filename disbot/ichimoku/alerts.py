@@ -5,7 +5,7 @@ import pandas as pd
 
 
 ALERT_COOLDOWN = timedelta(hours=1)     # Prevent moments of constant fluctuation from flooding a single alert
-CHART_BASE = "https://br.tradingview.com/chart/?symbol={}%3A{}{}"
+CHART_BASE = "https://en.tradingview.com/chart/?symbol={}%3A{}{}"
 
 
 def build_alerts():
